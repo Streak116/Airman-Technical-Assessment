@@ -42,5 +42,5 @@ COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 
 EXPOSE 4000
 
-# Start command (runs migrations automatically before booting API)
-CMD ["sh", "-c", "npx prisma migrate deploy && npm run start"]
+# Start command (runs prisma push automatically before booting API to sync schema)
+CMD ["sh", "-c", "npx prisma db push --accept-data-loss && npm run start"]
