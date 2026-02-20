@@ -42,5 +42,5 @@ COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 
 EXPOSE 4000
 
-# Start command (runs prisma push and seed automatically before booting API to sync schema and create admin)
-CMD ["sh", "-c", "npx prisma db push --accept-data-loss && npm install -g ts-node typescript && ts-node prisma/seed.ts && npm run start"]
+# Start command (safe production boot: only applies missing migrations)
+CMD ["sh", "-c", "npx prisma migrate deploy && npm run start"]
