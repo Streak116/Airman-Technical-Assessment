@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import prisma from '../prisma';
 import { catchAsync } from '../utils/catchAsync';
 import { AppError } from '../utils/appError';
+import { AuditService } from '../services/audit.service';
 
 // ─── COURSES ────────────────────────────────────────────────────────────────
 
@@ -95,6 +96,15 @@ export const createCourse = catchAsync(async (req: Request, res: Response, next:
         include: { instructor: { select: { id: true, username: true } } }
     });
 
+    AuditService.log({
+        action: 'Course Created',
+        entity: 'Course',
+        userId: req.user.id,
+        tenantId,
+        afterState: course,
+        correlationId: req.correlationId
+    });
+
     res.status(201).json({ status: 'success', data: { course } });
 });
 
@@ -114,6 +124,16 @@ export const updateCourse = catchAsync(async (req: Request, res: Response, next:
             description: req.body.description,
             lastModifiedById: instructorId
         }
+    });
+
+    AuditService.log({
+        action: 'Course Updated',
+        entity: 'Course',
+        userId: req.user.id,
+        tenantId,
+        beforeState: existing,
+        afterState: course,
+        correlationId: req.correlationId
     });
 
     res.status(200).json({ status: 'success', data: { course } });

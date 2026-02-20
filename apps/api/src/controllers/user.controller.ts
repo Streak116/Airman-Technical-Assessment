@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import prisma from '../prisma';
 import { catchAsync } from '../utils/catchAsync';
 import { AppError } from '../utils/appError';
+import { AuditService } from '../services/audit.service';
 
 /**
  * List all users with PENDING status for the current tenant.
@@ -69,6 +70,16 @@ export const approveUser = catchAsync(async (req: Request, res: Response, next: 
         }
     });
 
+    AuditService.log({
+        action: 'User Approved',
+        entity: 'User',
+        userId: adminId,
+        tenantId,
+        beforeState: { status: userToApprove.status },
+        afterState: { status: 'APPROVED' },
+        correlationId: req.correlationId
+    });
+
     res.status(200).json({
         status: 'success',
         data: { user: updatedUser }
@@ -98,6 +109,16 @@ export const suspendUser = catchAsync(async (req: Request, res: Response, next: 
     const updatedUser = await prisma.user.update({
         where: { id: userId },
         data: { status: 'SUSPENDED' }
+    });
+
+    AuditService.log({
+        action: 'User Suspended',
+        entity: 'User',
+        userId: req.user.id,
+        tenantId,
+        beforeState: { status: userToSuspend.status },
+        afterState: { status: 'SUSPENDED' },
+        correlationId: req.correlationId
     });
 
     res.status(200).json({

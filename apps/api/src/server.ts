@@ -21,6 +21,10 @@ app.use(cors());
 app.use(express.json());
 app.use(cookieParser());
 
+// Audit Middleware (Trace IDs)
+import { auditMiddleware } from './middleware/audit.middleware';
+app.use(auditMiddleware);
+
 // Routes
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/tenants', tenantRouter);

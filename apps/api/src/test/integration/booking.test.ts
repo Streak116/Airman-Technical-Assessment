@@ -11,6 +11,7 @@ describe('Booking Integration Flow', () => {
 
     beforeAll(async () => {
         // Clean up
+        await prisma.auditLog.deleteMany({ where: { tenant: { name: 'INT_BOOK_TENANT' } } });
         await prisma.booking.deleteMany({ where: { student: { username: { startsWith: 'INT_BOOK_' } } } });
         await prisma.user.deleteMany({ where: { username: { startsWith: 'INT_BOOK_' } } });
         await prisma.tenant.deleteMany({ where: { name: 'INT_BOOK_TENANT' } });
@@ -44,6 +45,7 @@ describe('Booking Integration Flow', () => {
     });
 
     afterAll(async () => {
+        await prisma.auditLog.deleteMany({ where: { tenant: { name: 'INT_BOOK_TENANT' } } });
         await prisma.booking.deleteMany({ where: { student: { username: { startsWith: 'INT_BOOK_' } } } });
         await prisma.user.deleteMany({ where: { username: { startsWith: 'INT_BOOK_' } } });
         await prisma.tenant.deleteMany({ where: { name: 'INT_BOOK_TENANT' } });

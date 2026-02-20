@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { catchAsync } from '../utils/catchAsync';
 import { AppError } from '../utils/appError';
 import prisma from '../prisma';
+import { AuditService } from '../services/audit.service';
 
 // ─── Booking CRUD ────────────────────────────────────────────────────────────
 
@@ -75,6 +76,15 @@ export const createBooking = catchAsync(async (req: Request, res: Response, next
             student: { select: { id: true, username: true } },
             instructor: { select: { id: true, username: true } }
         }
+    });
+
+    AuditService.log({
+        action: 'Schedule Created',
+        entity: 'Booking',
+        userId: req.user.id,
+        tenantId,
+        afterState: booking,
+        correlationId: req.correlationId
     });
 
     res.status(201).json({ status: 'success', data: { booking } });
@@ -176,6 +186,16 @@ export const updateBooking = catchAsync(async (req: Request, res: Response, next
             student: { select: { id: true, username: true } },
             instructor: { select: { id: true, username: true } }
         }
+    });
+
+    AuditService.log({
+        action: 'Schedule Updated',
+        entity: 'Booking',
+        userId: req.user.id,
+        tenantId: req.user.tenantId,
+        beforeState: booking,
+        afterState: updatedBooking,
+        correlationId: req.correlationId
     });
 
     res.status(200).json({ status: 'success', data: { booking: updatedBooking } });

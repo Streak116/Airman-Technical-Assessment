@@ -6,11 +6,13 @@ import * as cryptoUtils from '../../utils/crypto';
 describe('Auth Integration Flow', () => {
     beforeAll(async () => {
         // Clean up any previous test data
+        await prisma.auditLog.deleteMany({ where: { tenant: { name: 'INT_TEST_TENANT' } } });
         await prisma.user.deleteMany({ where: { username: { startsWith: 'INT_TEST_' } } });
         await prisma.tenant.deleteMany({ where: { name: 'INT_TEST_TENANT' } });
     });
 
     afterAll(async () => {
+        await prisma.auditLog.deleteMany({ where: { tenant: { name: 'INT_TEST_TENANT' } } });
         await prisma.user.deleteMany({ where: { username: { startsWith: 'INT_TEST_' } } });
         await prisma.tenant.deleteMany({ where: { name: 'INT_TEST_TENANT' } });
         await prisma.$disconnect();

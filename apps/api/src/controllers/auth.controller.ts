@@ -6,6 +6,7 @@ import { catchAsync } from '../utils/catchAsync';
 import { AppError } from '../utils/appError';
 import { z } from 'zod';
 import { decryptData } from '../utils/crypto';
+import { AuditService } from '../services/audit.service';
 
 const signToken = (id: string) => {
     return jwt.sign({ id }, process.env.JWT_SECRET || 'secret', {
@@ -112,6 +113,14 @@ export const login = catchAsync(async (req: Request, res: Response, next: NextFu
 
     // 4. If everything ok, send token to client
     createSendToken(user, 200, res);
+
+    AuditService.log({
+        action: 'User login',
+        entity: 'User',
+        userId: user.id,
+        tenantId: user.tenantId,
+        correlationId: req.correlationId
+    });
 });
 
 export const logout = (req: Request, res: Response) => {

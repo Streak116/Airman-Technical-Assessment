@@ -1,194 +1,199 @@
 generator client {
-    provider      = "prisma-client-js"
-    binaryTargets = ["native", "linux-musl"]
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl"]
 }
 
 datasource db {
-    provider = "postgresql"
-    url      = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 enum Role {
-    ADMIN
-    TENANT
-    INSTRUCTOR
-    STUDENT
+  ADMIN
+  TENANT
+  INSTRUCTOR
+  STUDENT
 }
 
 enum BookingStatus {
-    REQUESTED
-    APPROVED
-    INSTRUCTOR_ASSIGNED
-    COMPLETED
-    CANCELLED
+  REQUESTED
+  APPROVED
+  INSTRUCTOR_ASSIGNED
+  COMPLETED
+  CANCELLED
 }
 
 model Tenant {
-    id          String   @id @default(uuid())
-    name        String
-    description String?
-    email       String?
-    phone       String?
-    address     String?
-    createdAt   DateTime @default(now())
-    updatedAt   DateTime @updatedAt
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  email       String?
+  phone       String?
+  address     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-    users     User[]
-    courses   Course[]
-    bookings  Booking[]
-    auditLogs AuditLog[]
+  users     User[]
+  courses   Course[]
+  bookings  Booking[]
+  auditLogs AuditLog[]
 }
 
 enum UserStatus {
-    PENDING
-    APPROVED
-    SUSPENDED
+  PENDING
+  APPROVED
+  SUSPENDED
 }
 
 model User {
-    id       String     @id @default(uuid())
-    username String     @unique
-    password String
-    role     Role
-    tenantId String
-    status   UserStatus @default(PENDING)
+  id       String     @id @default(uuid())
+  username String     @unique
+  password String
+  role     Role
+  tenantId String
+  status   UserStatus @default(PENDING)
 
-    // Approval tracking
-    approvedAt    DateTime?
-    approvedById  String?
-    approvedBy    User?     @relation("ApprovedBy", fields: [approvedById], references: [id])
-    approvedUsers User[]    @relation("ApprovedBy")
+  // Approval tracking
+  approvedAt    DateTime?
+  approvedById  String?
+  approvedBy    User?     @relation("ApprovedBy", fields: [approvedById], references: [id])
+  approvedUsers User[]    @relation("ApprovedBy")
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-    tenant Tenant @relation(fields: [tenantId], references: [id])
+  tenant Tenant @relation(fields: [tenantId], references: [id])
 
-    studentBookings    Booking[] @relation("StudentBookings")
-    instructorBookings Booking[] @relation("InstructorBookings")
+  studentBookings    Booking[] @relation("StudentBookings")
+  instructorBookings Booking[] @relation("InstructorBookings")
 
-    coursesCreated    Course[]   @relation("CourseCreator")
-    coursesModified   Course[]   @relation("CourseModifier")
-    modulesModified   Module[]   @relation("ModuleModifier")
-    lessonsModified   Lesson[]   @relation("LessonModifier")
-    quizzesModified   Quiz[]     @relation("QuizModifier")
-    questionsModified Question[] @relation("QuestionModifier")
+  coursesCreated    Course[]   @relation("CourseCreator")
+  coursesModified   Course[]   @relation("CourseModifier")
+  modulesModified   Module[]   @relation("ModuleModifier")
+  lessonsModified   Lesson[]   @relation("LessonModifier")
+  quizzesModified   Quiz[]     @relation("QuizModifier")
+  questionsModified Question[] @relation("QuestionModifier")
 
-    quizAttempts QuizAttempt[]
-    courses      Course[]
+  quizAttempts QuizAttempt[]
+  courses      Course[]
+  auditLogs    AuditLog[]
 
-    @@index([username])
+  @@index([username])
 }
 
 model Course {
-    id               String   @id @default(uuid())
-    title            String
-    description      String?
-    tenantId         String
-    instructorId     String // Original creator
-    lastModifiedById String?
-    createdAt        DateTime @default(now())
-    updatedAt        DateTime @updatedAt
+  id               String   @id @default(uuid())
+  title            String
+  description      String?
+  tenantId         String
+  instructorId     String // Original creator
+  lastModifiedById String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
-    tenant       Tenant   @relation(fields: [tenantId], references: [id])
-    instructor   User     @relation("CourseCreator", fields: [instructorId], references: [id])
-    lastModified User?    @relation("CourseModifier", fields: [lastModifiedById], references: [id])
-    modules      Module[]
-    user         User?    @relation(fields: [userId], references: [id])
-    userId       String?
+  tenant       Tenant   @relation(fields: [tenantId], references: [id])
+  instructor   User     @relation("CourseCreator", fields: [instructorId], references: [id])
+  lastModified User?    @relation("CourseModifier", fields: [lastModifiedById], references: [id])
+  modules      Module[]
+  user         User?    @relation(fields: [userId], references: [id])
+  userId       String?
 }
 
 model Module {
-    id               String   @id @default(uuid())
-    title            String
-    courseId         String
-    lastModifiedById String?
-    createdAt        DateTime @default(now())
-    updatedAt        DateTime @updatedAt
+  id               String   @id @default(uuid())
+  title            String
+  courseId         String
+  lastModifiedById String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
-    course       Course   @relation(fields: [courseId], references: [id])
-    lastModified User?    @relation("ModuleModifier", fields: [lastModifiedById], references: [id])
-    lessons      Lesson[]
+  course       Course   @relation(fields: [courseId], references: [id])
+  lastModified User?    @relation("ModuleModifier", fields: [lastModifiedById], references: [id])
+  lessons      Lesson[]
 }
 
 model Lesson {
-    id               String   @id @default(uuid())
-    title            String
-    content          String?
-    quizId           String?  @unique
-    moduleId         String
-    lastModifiedById String?
-    createdAt        DateTime @default(now())
-    updatedAt        DateTime @updatedAt
+  id               String   @id @default(uuid())
+  title            String
+  content          String?
+  quizId           String?  @unique
+  moduleId         String
+  lastModifiedById String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
-    module       Module @relation(fields: [moduleId], references: [id])
-    quiz         Quiz?  @relation(fields: [quizId], references: [id])
-    lastModified User?  @relation("LessonModifier", fields: [lastModifiedById], references: [id])
+  module       Module @relation(fields: [moduleId], references: [id])
+  quiz         Quiz?  @relation(fields: [quizId], references: [id])
+  lastModified User?  @relation("LessonModifier", fields: [lastModifiedById], references: [id])
 }
 
 model Quiz {
-    id               String   @id @default(uuid())
-    title            String
-    lastModifiedById String?
-    createdAt        DateTime @default(now())
-    updatedAt        DateTime @updatedAt
+  id               String   @id @default(uuid())
+  title            String
+  lastModifiedById String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
-    lesson       Lesson?
-    lastModified User?         @relation("QuizModifier", fields: [lastModifiedById], references: [id])
-    questions    Question[]
-    attempts     QuizAttempt[]
+  lesson       Lesson?
+  lastModified User?         @relation("QuizModifier", fields: [lastModifiedById], references: [id])
+  questions    Question[]
+  attempts     QuizAttempt[]
 }
 
 model Question {
-    id               String   @id @default(uuid())
-    text             String
-    options          Json // Support strings array
-    correctOption    Int
-    quizId           String
-    lastModifiedById String?
-    createdAt        DateTime @default(now())
-    updatedAt        DateTime @updatedAt
+  id               String   @id @default(uuid())
+  text             String
+  options          Json // Support strings array
+  correctOption    Int
+  quizId           String
+  lastModifiedById String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
-    quiz         Quiz  @relation(fields: [quizId], references: [id])
-    lastModified User? @relation("QuestionModifier", fields: [lastModifiedById], references: [id])
+  quiz         Quiz  @relation(fields: [quizId], references: [id])
+  lastModified User? @relation("QuestionModifier", fields: [lastModifiedById], references: [id])
 }
 
 model QuizAttempt {
-    id        String   @id @default(uuid())
-    userId    String
-    quizId    String
-    score     Int
-    answers   Json
-    createdAt DateTime @default(now())
+  id        String   @id @default(uuid())
+  userId    String
+  quizId    String
+  score     Int
+  answers   Json
+  createdAt DateTime @default(now())
 
-    user User @relation(fields: [userId], references: [id])
-    quiz Quiz @relation(fields: [quizId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+  quiz Quiz @relation(fields: [quizId], references: [id])
 }
 
 model Booking {
-    id                 String        @id @default(uuid())
-    studentId          String
-    instructorId       String?
-    startTime          DateTime
-    endTime            DateTime
-    status             BookingStatus @default(REQUESTED)
-    cancellationReason String?
-    tenantId           String
-    createdAt          DateTime      @default(now())
-    updatedAt          DateTime      @updatedAt
+  id                 String        @id @default(uuid())
+  studentId          String
+  instructorId       String?
+  startTime          DateTime
+  endTime            DateTime
+  status             BookingStatus @default(REQUESTED)
+  cancellationReason String?
+  tenantId           String
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
 
-    tenant     Tenant @relation(fields: [tenantId], references: [id])
-    student    User   @relation("StudentBookings", fields: [studentId], references: [id])
-    instructor User?  @relation("InstructorBookings", fields: [instructorId], references: [id])
+  tenant     Tenant @relation(fields: [tenantId], references: [id])
+  student    User   @relation("StudentBookings", fields: [studentId], references: [id])
+  instructor User?  @relation("InstructorBookings", fields: [instructorId], references: [id])
 }
 
 model AuditLog {
-    id        String   @id @default(uuid())
-    action    String
-    userId    String
-    tenantId  String
-    details   Json?
-    timestamp DateTime @default(now())
+  id            String   @id @default(uuid())
+  action        String
+  entity        String
+  userId        String
+  tenantId      String
+  beforeState   Json?
+  afterState    Json?
+  correlationId String?
+  timestamp     DateTime @default(now())
 
-    tenant Tenant @relation(fields: [tenantId], references: [id])
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
 }
