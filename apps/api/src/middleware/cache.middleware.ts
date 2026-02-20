@@ -1,17 +1,16 @@
 import { Request, Response, NextFunction } from 'express';
 import IORedis from 'ioredis';
 
-const redisHost = process.env.REDIS_HOST || 'localhost';
-const redisPort = parseInt(process.env.REDIS_PORT || '6379');
-
 const redisNode = process.env.NODE_ENV === 'test'
     ? require('ioredis-mock')
     : IORedis;
 
-export const redisClient = new redisNode({
-    host: redisHost,
-    port: redisPort,
-});
+export const redisClient = process.env.REDIS_URL
+    ? new redisNode(process.env.REDIS_URL)
+    : new redisNode({
+        host: process.env.REDIS_HOST || 'localhost',
+        port: parseInt(process.env.REDIS_PORT || '6379'),
+    });
 
 export const cacheMiddleware = (durationInSeconds: number) => {
     return async (req: Request, res: Response, next: NextFunction) => {

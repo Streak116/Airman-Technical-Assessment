@@ -49,13 +49,13 @@ export default function HomePage() {
                 accent="sky"
                 onClick={() => router.push('/tenants')}
               />
-              <DashboardCard 
+              {/* <DashboardCard 
                 title="Global Approvals" 
                 desc="Review pending registrations across the network" 
                 icon={<Shield className="w-6 h-6" />}
                 accent="amber"
                 onClick={() => router.push('/approvals')}
-              />
+              /> */}
             </>
           ) : (
             <>
@@ -75,12 +75,12 @@ export default function HomePage() {
                 accent="emerald"
                 onClick={() => router.push('/schedule')}
               />
-              <DashboardCard 
+              {/* <DashboardCard 
                 title="Profile & Logbook" 
                 desc="Personal flight record and credentials" 
                 icon={<User className="w-6 h-6" />}
                 accent="amber"
-              />
+              /> */}
               {user.role === 'TENANT' && (
                 <>
                   <DashboardCard 
@@ -103,7 +103,7 @@ export default function HomePage() {
           )}
         </div>
 
-        <section className="mt-12 bg-slate-900/40 border border-white/5 rounded-2xl p-8 backdrop-blur-sm">
+        {/* <section className="mt-12 bg-slate-900/40 border border-white/5 rounded-2xl p-8 backdrop-blur-sm">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-lg font-bold text-white">Directives</h2>
             <span className="text-[10px] font-mono text-sky-400/50 uppercase tracking-widest">Live Updates</span>
@@ -118,7 +118,7 @@ export default function HomePage() {
               <p className="text-sm text-slate-400">Phase 3 Learning Modules awaiting deployment...</p>
             </div>
           </div>
-        </section>
+        </section> */}
       </main>
     </div>
   );

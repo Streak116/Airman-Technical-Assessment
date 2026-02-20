@@ -3,15 +3,16 @@ import IORedis from 'ioredis';
 import prisma from '../prisma';
 import { AuditService } from '../services/audit.service';
 
-const redisHost = process.env.REDIS_HOST || 'localhost';
-const redisPort = parseInt(process.env.REDIS_PORT || '6379');
+// Railway provides a full URI in REDIS_URL. Use it if available, otherwise fall back.
+const connection = process.env.REDIS_URL
+    ? new IORedis(process.env.REDIS_URL, { maxRetriesPerRequest: null })
+    : new IORedis({
+        host: process.env.REDIS_HOST || 'localhost',
+        port: parseInt(process.env.REDIS_PORT || '6379'),
+        maxRetriesPerRequest: null
+    });
 
-const connection = {
-    host: redisHost,
-    port: redisPort,
-};
-
-export const escalationQueue = new Queue('booking-escalation', { connection });
+export const escalationQueue = new Queue('booking-escalation', { connection: connection as any });
 
 // ─── Worker Setup ────────────────────────────────────────────────────────────
 
@@ -63,7 +64,7 @@ export const escalationWorker = new Worker('booking-escalation', async (job) => 
         console.log(`[Job ${job.id}] ✅ Booking ${bookingId} is already resolved or assigned (Status: ${booking.status}). No escalation needed.`);
     }
 
-}, { connection });
+}, { connection: connection as any });
 
 escalationWorker.on('completed', (job) => {
     console.log(`[Job] Escalation job ${job.id} has completed!`);

@@ -64,9 +64,9 @@ export default function LoginPage() {
             AIRMAN <span className="text-sky-400">CORE</span>
           </h1>
           <div className="flex items-center justify-center gap-3 text-xs font-mono text-slate-400 tracking-widest uppercase opacity-75">
-            <span>System Online</span>
+            {/* <span>System Online</span> */}
             <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full shadow-[0_0_8px_#10b981] animate-pulse" />
-            <span>v2.4.0</span>
+            {/* <span>v2.4.0</span> */}
           </div>
         </div>
 
