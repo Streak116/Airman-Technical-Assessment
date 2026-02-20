@@ -42,5 +42,5 @@ COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 
 EXPOSE 4000
 
-# Start command (runs prisma push to safely apply additive schema changes before booting API)
-CMD ["sh", "-c", "npx prisma db push && npm run start"]
+# Start command (runs prisma push and seed automatically before booting API to sync schema and create admin)
+CMD ["sh", "-c", "npx prisma db push --accept-data-loss && npm install -g ts-node typescript && ts-node prisma/seed.ts && npm run start"]
