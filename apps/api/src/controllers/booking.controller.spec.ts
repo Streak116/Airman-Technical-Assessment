@@ -3,6 +3,12 @@ import { createBooking } from './booking.controller';
 import { prismaMock } from '../test/setup';
 import { AppError } from '../utils/appError';
 
+jest.mock('../jobs/queue', () => ({
+    escalationQueue: {
+        add: jest.fn().mockResolvedValue({})
+    }
+}));
+
 describe('Booking Controller', () => {
     let mockReq: Partial<Request> & { user?: any };
     let mockRes: Partial<Response>;
