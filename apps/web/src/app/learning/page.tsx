@@ -122,7 +122,7 @@ export default function LearningCenterPage() {
             <div>
               <h1 className="text-4xl font-bold text-white mb-2 tracking-tight">Ground School</h1>
               <p className="text-slate-400 font-mono text-[10px] uppercase tracking-[0.2em]">
-                {total} course{total !== 1 ? 's' : ''} available // {user?.role}
+                {total} course{total !== 1 ? 's' : ''} available
               </p>
             </div>
             

@@ -129,7 +129,7 @@ export default function SchedulePage() {
 
         setIsBookingModalOpen(false);
         fetchBookings();
-        alert('Booking requested successfully!');
+        alert('Booking requested successfully! Have a safe flight! ✈️');
     } catch (e: any) {
         alert(e.message);
     }
@@ -245,7 +245,7 @@ export default function SchedulePage() {
                         Flight Schedule
                     </h1>
                     <p className="text-slate-400 text-xs font-mono uppercase tracking-widest">
-                        Week of {weekDays[0].toLocaleDateString()}
+                        Week of {String(weekDays[0].getDate()).padStart(2, '0')}-{String(weekDays[0].getMonth() + 1).padStart(2, '0')}-{weekDays[0].getFullYear()}
                     </p>
                 </div>
             </div>

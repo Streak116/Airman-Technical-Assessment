@@ -103,7 +103,7 @@ export default function ApprovalsPage() {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">
-              Personnel Approval Queue
+              Student Approval Queue
             </h1>
             <p className="text-slate-500 mt-1 font-mono text-sm uppercase tracking-wider">
               Verification required for system access

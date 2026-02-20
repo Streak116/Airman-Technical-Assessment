@@ -49,7 +49,7 @@ export default function TenantsPage() {
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
             <div className="flex-1">
               <h1 className="text-4xl font-bold text-white mb-2 tracking-tight">Active Flight Schools</h1>
-              <p className="text-slate-400 font-mono text-[10px] uppercase tracking-[0.2em]">Deployment Tier: Global // Active Nodes: {tenants.length}</p>
+              <p className="text-slate-400 font-mono text-[10px] uppercase tracking-[0.2em]">Active Academies: {tenants.length}</p>
             </div>
             
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">

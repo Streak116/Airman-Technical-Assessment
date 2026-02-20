@@ -86,7 +86,7 @@ export default function Navbar() {
             )}
           </div>
           
-          {(user.role === 'ADMIN' || user.role === 'TENANT') && (
+          {(user.role === 'TENANT') && (
             <EscalationDropdown />
           )}
 

@@ -267,14 +267,14 @@ function TenantFormContent() {
                 <input 
                   value={formData.phone}
                   onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                  placeholder="+1-800-PILOT"
+                  placeholder="+91-9876543210"
                   className="w-full bg-slate-950/50 border border-white/10 rounded-xl py-3 px-4 font-mono text-sm text-sky-100 placeholder:opacity-30 focus:outline-none focus:border-sky-500/50 focus:bg-slate-900/80 transition-all"
                 />
               </div>
 
               <div className="md:col-span-2 space-y-2">
                 <label className="text-[10px] font-mono font-bold text-sky-400/80 uppercase tracking-widest flex items-center gap-2">
-                  <MapPin className="w-3 h-3" /> Operations Hangar (Address)
+                  <MapPin className="w-3 h-3" /> Operations Base (Address)
                 </label>
                 <input 
                   value={formData.address}
@@ -292,7 +292,7 @@ function TenantFormContent() {
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-2xl font-bold text-white flex items-center gap-3">
-                    <Users className="w-6 h-6 text-sky-400" /> Academy Personnel
+                    <Users className="w-6 h-6 text-sky-400" /> Academy Administrators
                   </h2>
                   <p className="text-slate-500 font-mono text-[10px] uppercase tracking-wider mt-1">Authorized Flight School Administrators</p>
                 </div>
