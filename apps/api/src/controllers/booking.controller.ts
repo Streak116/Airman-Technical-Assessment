@@ -87,6 +87,21 @@ export const createBooking = catchAsync(async (req: Request, res: Response, next
         correlationId: req.correlationId
     });
 
+    // Schedule an escalation check before the flight (configured via env, defaults to 48 hours)
+    const escalationHours = parseInt(process.env.ESCALATION_HOURS || '48', 10);
+    const escalationCheckTime = new Date(start.getTime() - escalationHours * 60 * 60 * 1000);
+    const delay = Math.max(0, escalationCheckTime.getTime() - now.getTime());
+
+    // Using inline require to prevent circular deps during testing, alternatively just import it at top
+    const { escalationQueue } = require('../jobs/queue');
+    await escalationQueue.add('check-escalation', {
+        bookingId: booking.id,
+        tenantId: booking.tenantId
+    }, {
+        delay,
+        jobId: `escalation-${booking.id}` // Prevent duplicates by tying jobId to booking
+    });
+
     res.status(201).json({ status: 'success', data: { booking } });
 });
 
@@ -197,6 +212,20 @@ export const updateBooking = catchAsync(async (req: Request, res: Response, next
         afterState: updatedBooking,
         correlationId: req.correlationId
     });
+
+    if (instructorId) {
+        // Automatically resolve escalations if an instructor was just assigned
+        await prisma.escalation.updateMany({
+            where: { bookingId: id },
+            data: { status: 'RESOLVED' }
+        });
+    } else if (status === 'CANCELLED') {
+        // Or if the booking is cancelled
+        await prisma.escalation.updateMany({
+            where: { bookingId: id },
+            data: { status: 'RESOLVED' }
+        });
+    }
 
     res.status(200).json({ status: 'success', data: { booking: updatedBooking } });
 });

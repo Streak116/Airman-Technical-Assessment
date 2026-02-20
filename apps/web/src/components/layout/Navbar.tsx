@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { Plane, LogOut, ArrowLeft } from 'lucide-react';
+import EscalationDropdown from '../escalations/EscalationDropdown';
 
 export default function Navbar() {
   const router = useRouter();
@@ -84,6 +85,11 @@ export default function Navbar() {
               </span>
             )}
           </div>
+          
+          {(user.role === 'ADMIN' || user.role === 'TENANT') && (
+            <EscalationDropdown />
+          )}
+
           <button 
             onClick={handleLogout}
             className="text-slate-400 hover:text-white transition-colors p-1"

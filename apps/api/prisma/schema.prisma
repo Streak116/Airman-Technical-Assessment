@@ -33,10 +33,11 @@ model Tenant {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  users     User[]
-  courses   Course[]
-  bookings  Booking[]
-  auditLogs AuditLog[]
+  users       User[]
+  courses     Course[]
+  bookings    Booking[]
+  auditLogs   AuditLog[]
+  escalations Escalation[]
 }
 
 enum UserStatus {
@@ -178,9 +179,10 @@ model Booking {
   createdAt          DateTime      @default(now())
   updatedAt          DateTime      @updatedAt
 
-  tenant     Tenant @relation(fields: [tenantId], references: [id])
-  student    User   @relation("StudentBookings", fields: [studentId], references: [id])
-  instructor User?  @relation("InstructorBookings", fields: [instructorId], references: [id])
+  tenant      Tenant       @relation(fields: [tenantId], references: [id])
+  student     User         @relation("StudentBookings", fields: [studentId], references: [id])
+  instructor  User?        @relation("InstructorBookings", fields: [instructorId], references: [id])
+  escalations Escalation[]
 }
 
 model AuditLog {
@@ -196,4 +198,22 @@ model AuditLog {
 
   tenant Tenant @relation(fields: [tenantId], references: [id])
   user   User   @relation(fields: [userId], references: [id])
+}
+
+enum EscalationStatus {
+  UNRESOLVED
+  RESOLVED
+}
+
+model Escalation {
+  id        String           @id @default(uuid())
+  bookingId String
+  tenantId  String
+  message   String
+  status    EscalationStatus @default(UNRESOLVED)
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  booking Booking @relation(fields: [bookingId], references: [id])
+  tenant  Tenant  @relation(fields: [tenantId], references: [id])
 }

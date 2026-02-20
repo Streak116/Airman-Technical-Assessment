@@ -11,6 +11,9 @@ import bookingRouter from './routes/booking.routes';
 import { AppError } from './utils/appError';
 import { globalErrorHandler } from './middleware/error.middleware';
 
+// Initialize Background Workers
+import './jobs/queue';
+
 dotenv.config();
 
 const app = express();
@@ -26,11 +29,16 @@ import { auditMiddleware } from './middleware/audit.middleware';
 app.use(auditMiddleware);
 
 // Routes
+import escalationRouter from './routes/escalation.routes';
+
+// ... (other code) ...
+
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/tenants', tenantRouter);
 app.use('/api/v1/learning', learningRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/bookings', bookingRouter);
+app.use('/api/v1/escalations', escalationRouter);
 
 app.get('/', (req, res) => {
     res.json({ message: 'Airman API is running!' });

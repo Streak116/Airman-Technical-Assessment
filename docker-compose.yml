@@ -36,6 +36,7 @@ services:
       - JWT_EXPIRES_IN=90d
       - ENCRYPTION_KEY=0123456789abcdef0123456789abcdef
       - ENVIRONMENT=development
+      - ESCALATION_HOURS=48
     depends_on:
       - postgres
       - redis
