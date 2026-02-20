@@ -9,4 +9,14 @@ export const ENDPOINTS = {
     TENANTS: {
         BASE: `${API_BASE_URL}/tenants`,
     },
+    LEARNING: {
+        COURSES: `${API_BASE_URL}/learning/courses`,
+        COURSE: (id: string) => `${API_BASE_URL}/learning/courses/${id}`,
+        MODULES: (courseId: string) => `${API_BASE_URL}/learning/courses/${courseId}/modules`,
+        MODULE: (courseId: string, moduleId: string) => `${API_BASE_URL}/learning/courses/${courseId}/modules/${moduleId}`,
+        LESSONS: (courseId: string, moduleId: string) => `${API_BASE_URL}/learning/courses/${courseId}/modules/${moduleId}/lessons`,
+        LESSON: (courseId: string, moduleId: string, lessonId: string) => `${API_BASE_URL}/learning/courses/${courseId}/modules/${moduleId}/lessons/${lessonId}`,
+        QUIZ_QUESTIONS: (quizId: string) => `${API_BASE_URL}/learning/quizzes/${quizId}/questions`,
+        QUIZ_QUESTION: (quizId: string, questionId: string) => `${API_BASE_URL}/learning/quizzes/${quizId}/questions/${questionId}`,
+    },
 };

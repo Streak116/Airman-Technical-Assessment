@@ -148,6 +148,17 @@ export default function LoginPage() {
               </div>
             </button>
           </form>
+
+          <div className="mt-8 pt-8 border-t border-white/5 text-center">
+            <p className="text-slate-500 text-xs font-mono uppercase tracking-[0.2em] mb-4">New Recruit?</p>
+            <button
+              onClick={() => router.push('/signup')}
+              className="text-sky-400 hover:text-sky-300 font-bold text-sm transition-colors flex items-center justify-center gap-2 mx-auto group"
+            >
+              Join a Flight Academy
+              <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </button>
+          </div>
         </div>
 
         {/* Footer */}

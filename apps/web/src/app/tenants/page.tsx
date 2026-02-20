@@ -4,10 +4,12 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plane, ArrowLeft, Building2, Plus, Users, Search } from 'lucide-react';
 import { apiService } from '@/lib/apiService';
+import Navbar from '@/components/layout/Navbar';
 
 export default function TenantsPage() {
   const router = useRouter();
   const [tenants, setTenants] = useState<any[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -24,7 +26,7 @@ export default function TenantsPage() {
           setTenants(data.data.tenants);
         }
       } catch (err) {
-        console.error('Failed to fetch tenants', err);
+        console.error('Failed to load nodes:', err);
       } finally {
         setIsLoading(false);
       }
@@ -33,55 +35,60 @@ export default function TenantsPage() {
     fetchTenants();
   }, [router]);
 
+  const filteredTenants = tenants.filter(t => 
+    t.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    t.id.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-200 font-sans">
-      <nav className="border-b border-white/10 bg-slate-900/50 backdrop-blur-md sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <button 
-              onClick={() => router.push('/')}
-              className="p-2 hover:bg-white/5 rounded-lg transition-colors border border-transparent hover:border-white/10"
-            >
-              <ArrowLeft className="w-5 h-5 text-sky-400" />
-            </button>
-            <div className="h-4 w-px bg-white/10 mx-2" />
-            <span className="font-bold tracking-tight text-white uppercase text-sm">Tenant Control // Global</span>
-          </div>
-          
-          <button 
-            onClick={() => router.push('/tenants/tenant-form')}
-            className="flex items-center gap-2 bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold px-4 py-2 rounded-lg transition-all shadow-[0_0_15px_rgba(14,165,233,0.3)]"
-          >
-            <Plus className="w-4 h-4" />
-            Onboard New Academy
-          </button>
-        </div>
-      </nav>
+      <Navbar />
 
       <main className="max-w-7xl mx-auto px-4 py-12">
-        <header className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
-          <div>
-            <h1 className="text-4xl font-bold text-white mb-2 tracking-tight">Active Flight Schools</h1>
-            <p className="text-slate-400 font-mono text-xs uppercase tracking-[0.2em]">Deployment Tier: Global // Active Nodes: {tenants.length}</p>
+        <header className="mb-12">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
+            <div className="flex-1">
+              <h1 className="text-4xl font-bold text-white mb-2 tracking-tight">Active Flight Schools</h1>
+              <p className="text-slate-400 font-mono text-[10px] uppercase tracking-[0.2em]">Deployment Tier: Global // Active Nodes: {tenants.length}</p>
+            </div>
+            
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+              <div className="relative group min-w-[300px]">
+                <Search className="absolute left-3 top-2.5 w-4 h-4 text-slate-500 group-focus-within:text-sky-400 transition-colors" />
+                <input 
+                  type="text" 
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Search by name or node ID..." 
+                  className="w-full bg-slate-900/50 border border-white/10 rounded-xl py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-sky-500/50 transition-all font-mono text-sky-100 placeholder:opacity-30"
+                />
+              </div>
+
+              <button 
+                onClick={() => router.push('/tenants/tenant-form')}
+                className="flex items-center justify-center gap-2 bg-sky-600 hover:bg-sky-500 text-white text-[10px] font-bold px-6 py-2.5 rounded-xl transition-all shadow-[0_0_15px_rgba(14,165,233,0.3)] uppercase tracking-widest h-full whitespace-nowrap"
+              >
+                <Plus className="w-4 h-4" />
+                Onboard Academy
+              </button>
+            </div>
           </div>
           
-          <div className="relative group min-w-[300px]">
-            <Search className="absolute left-3 top-2.5 w-4 h-4 text-slate-500 group-focus-within:text-sky-400 transition-colors" />
-            <input 
-              type="text" 
-              placeholder="Filter by Frequency..." 
-              className="w-full bg-slate-900/50 border border-white/10 rounded-xl py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-sky-500/50 transition-all font-mono"
-            />
-          </div>
+          <div className="h-px w-full bg-gradient-to-r from-transparent via-sky-500/20 to-transparent" />
         </header>
 
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-pulse">
             {[1, 2, 3].map(i => <div key={i} className="h-48 bg-white/5 rounded-2xl border border-white/5" />)}
           </div>
+        ) : filteredTenants.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-24 text-slate-600 gap-4 border border-dashed border-white/5 rounded-3xl">
+            <Building2 className="w-16 h-16 opacity-20" />
+            <p className="font-mono text-sm uppercase tracking-widest">No active nodes found matching criteria.</p>
+          </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {tenants.map(tenant => (
+            {filteredTenants.map(tenant => (
               <div 
                 key={tenant.id} 
                 onClick={() => router.push(`/tenants/tenant-form?id=${tenant.id}`)}

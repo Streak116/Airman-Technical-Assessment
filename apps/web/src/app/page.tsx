@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plane, LogOut, User, LayoutDashboard, Settings, ClipboardList, Calendar } from 'lucide-react';
+import { LayoutDashboard, Settings, ClipboardList, Calendar, UserCheck, Shield, User } from 'lucide-react';
+import Navbar from '@/components/layout/Navbar';
 
 export default function HomePage() {
   const router = useRouter();
@@ -17,12 +18,6 @@ export default function HomePage() {
     }
   }, [router]);
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    router.push('/login');
-  };
-
   if (!user) return null;
 
   return (
@@ -35,30 +30,7 @@ export default function HomePage() {
       </div>
 
       {/* Navigation Bar */}
-      <nav className="relative z-10 border-b border-white/10 bg-slate-900/50 backdrop-blur-md">
-        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-sky-600 rounded flex items-center justify-center">
-              <Plane className="w-5 h-5 text-white -rotate-45" />
-            </div>
-            <span className="font-bold tracking-tight text-white">AIRMAN <span className="text-sky-400">CORE</span></span>
-          </div>
-
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-2 text-xs font-mono text-slate-400">
-              <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_8px_#10b981]" />
-              {user.username} // {user.role}
-            </div>
-            <button 
-              onClick={handleLogout}
-              className="text-slate-400 hover:text-white transition-colors"
-              title="Terminate Session"
-            >
-              <LogOut className="w-5 h-5" />
-            </button>
-          </div>
-        </div>
-      </nav>
+      <Navbar />
 
       <main className="relative z-10 max-w-7xl mx-auto px-4 py-12">
         <header className="mb-12">
@@ -69,21 +41,31 @@ export default function HomePage() {
         {/* Dashboard Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {user.role === 'ADMIN' ? (
-            <DashboardCard 
-              title="Tenant Management" 
-              desc="Onboard and manage flight school tenants" 
-              icon={<LayoutDashboard className="w-6 h-6" />}
-              accent="sky"
-              onClick={() => router.push('/tenants')}
-            />
+            <>
+              <DashboardCard 
+                title="Tenant Management" 
+                desc="Onboard and manage flight school tenants" 
+                icon={<LayoutDashboard className="w-6 h-6" />}
+                accent="sky"
+                onClick={() => router.push('/tenants')}
+              />
+              <DashboardCard 
+                title="Global Approvals" 
+                desc="Review pending registrations across the network" 
+                icon={<Shield className="w-6 h-6" />}
+                accent="amber"
+                onClick={() => router.push('/approvals')}
+              />
+            </>
           ) : (
             <>
-              {(user.role === 'TENANT' || user.role === 'INSTRUCTOR') && (
+              {(user.role === 'TENANT' || user.role === 'INSTRUCTOR' || user.role === 'STUDENT') && (
                 <DashboardCard 
                   title="Learning Center" 
                   desc="Ground school modules and materials" 
                   icon={<ClipboardList className="w-6 h-6" />}
                   accent="sky"
+                  onClick={() => router.push('/learning')}
                 />
               )}
               <DashboardCard 
@@ -91,6 +73,7 @@ export default function HomePage() {
                 desc="Manage bookings and instructor time" 
                 icon={<Calendar className="w-6 h-6" />}
                 accent="emerald"
+                onClick={() => router.push('/schedule')}
               />
               <DashboardCard 
                 title="Profile & Logbook" 
@@ -99,12 +82,22 @@ export default function HomePage() {
                 accent="amber"
               />
               {user.role === 'TENANT' && (
-                <DashboardCard 
-                  title="School Settings" 
-                  desc="Manage instructors and student approvals" 
-                  icon={<Settings className="w-6 h-6" />}
-                  accent="slate"
-                />
+                <>
+                  <DashboardCard 
+                    title="Student Approvals" 
+                    desc="Process pending student registrations" 
+                    icon={<UserCheck className="w-6 h-6" />}
+                    accent="amber"
+                    onClick={() => router.push('/approvals')}
+                  />
+                  <DashboardCard 
+                    title="Instructor Management" 
+                    desc="Manage academy instructors and access keys" 
+                    icon={<Settings className="w-6 h-6" />}
+                    accent="slate"
+                    onClick={() => router.push('/instructors')}
+                  />
+                </>
               )}
             </>
           )}

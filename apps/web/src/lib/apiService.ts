@@ -111,6 +111,19 @@ class ApiService {
     async updatePersonnelPassword(tenantId: string, userId: string, passwordData: any) {
         return this.patch(`${ENDPOINTS.TENANTS.BASE}/${tenantId}/users/${userId}/password`, passwordData);
     }
+
+    // Instructor management (for TENANT users)
+    async getMyInstructors() {
+        return this.get(`${ENDPOINTS.TENANTS.BASE}/my/instructors`);
+    }
+
+    async createInstructor(data: any) {
+        return this.post(`${ENDPOINTS.TENANTS.BASE}/my/instructors`, data);
+    }
+
+    async updateInstructorPassword(userId: string, passwordData: any) {
+        return this.patch(`${ENDPOINTS.TENANTS.BASE}/my/instructors/${userId}/password`, passwordData);
+    }
 }
 
 export const apiService = new ApiService();

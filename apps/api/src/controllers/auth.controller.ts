@@ -45,17 +45,23 @@ export const register = catchAsync(async (req: Request, res: Response, next: Nex
         username: z.string().min(3),
         password: z.string().min(8),
         role: z.enum(['ADMIN', 'TENANT', 'INSTRUCTOR', 'STUDENT']),
-        tenantName: z.string().min(2), // We'll create a tenant on registration for simplicity
+        tenantName: z.string().min(2).optional(),
+        tenantId: z.string().optional(),
     });
 
     const validatedData = schema.parse(req.body);
+    let targetTenantId = validatedData.tenantId;
 
-    // 1. Create Tenant
-    const tenant = await prisma.tenant.create({
-        data: {
-            name: validatedData.tenantName,
-        },
-    });
+    // 1. Handle Tenant (Create or Join)
+    if (!targetTenantId) {
+        if (!validatedData.tenantName) {
+            return next(new AppError('Please provide either an academy name to create or an academy ID to join', 400));
+        }
+        const tenant = await prisma.tenant.create({
+            data: { name: validatedData.tenantName as string }
+        });
+        targetTenantId = tenant.id;
+    }
 
     // 2. Hash Password
     const hashedPassword = await bcrypt.hash(validatedData.password, 12);
@@ -65,8 +71,9 @@ export const register = catchAsync(async (req: Request, res: Response, next: Nex
         data: {
             username: validatedData.username.toUpperCase(),
             password: hashedPassword,
-            role: validatedData.role,
-            tenantId: tenant.id,
+            role: validatedData.role as any,
+            tenantId: targetTenantId,
+            status: validatedData.role === 'STUDENT' ? 'PENDING' : 'APPROVED',
         },
     });
 
@@ -88,13 +95,22 @@ export const login = catchAsync(async (req: Request, res: Response, next: NextFu
     // 2. Check if user exists && password is correct
     const user = await prisma.user.findUnique({
         where: { username: username.toUpperCase() },
+        include: { tenant: { select: { id: true, name: true } } },
     });
 
     if (!user || !(await bcrypt.compare(password, user.password))) {
         return next(new AppError('Incorrect username or password', 401));
     }
 
-    // 3. If everything ok, send token to client
+    // 3. Check user status
+    if (user.status === 'PENDING') {
+        return next(new AppError('Your account is pending approval by an administrator', 403));
+    }
+    if (user.status === 'SUSPENDED') {
+        return next(new AppError('Your account has been suspended', 403));
+    }
+
+    // 4. If everything ok, send token to client
     createSendToken(user, 200, res);
 });
 

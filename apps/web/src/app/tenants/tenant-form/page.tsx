@@ -2,8 +2,9 @@
 
 import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Plane, ArrowLeft, Building2, Save, Trash2, ShieldCheck, Mail, Phone, MapPin, AlignLeft, Users, Plus, X, Lock, Key } from 'lucide-react';
+import { ArrowLeft, Building2, Save, Trash2, ShieldCheck, Mail, Phone, MapPin, AlignLeft, Users, Plus, X, Lock, Key } from 'lucide-react';
 import { apiService } from '@/lib/apiService';
+import Navbar from '@/components/layout/Navbar';
 import { encryptData } from '@/lib/crypto';
 
 function TenantFormContent() {
@@ -162,55 +163,42 @@ function TenantFormContent() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-200 font-sans">
-      <nav className="border-b border-white/10 bg-slate-900/50 backdrop-blur-md sticky top-0 z-50">
-        <div className="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <button 
-              onClick={() => router.push('/tenants')}
-              className="p-2 hover:bg-white/5 rounded-lg transition-colors border border-transparent hover:border-white/10"
-            >
-              <ArrowLeft className="w-5 h-5 text-sky-400" />
-            </button>
-            <div className="h-4 w-px bg-white/10 mx-2" />
-            <span className="font-bold tracking-tight text-white uppercase text-xs">
-              {isNew ? 'New Deployment' : `Edit Node // ${id?.slice(0, 8)}`}
-            </span>
+      <Navbar />
+
+      <main className="max-w-4xl mx-auto px-4 py-12">
+        <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div>
+            <h1 className="text-4xl font-bold text-white mb-2 tracking-tight">
+              {isNew ? 'Academy Onboarding' : 'Modify Configuration'}
+            </h1>
+            <p className="text-slate-400 font-mono text-[10px] uppercase tracking-[0.2em]">
+              System: Airman Cockpit // Node ID: {id?.slice(0, 8) || 'NEW'}
+            </p>
           </div>
 
           <div className="flex items-center gap-3">
              {!isNew && (
                <button 
                  onClick={handleDelete}
-                 className="p-2 hover:bg-red-500/10 text-red-500 rounded-lg transition-colors group"
+                 className="p-1.5 hover:bg-red-500/10 text-red-500/60 hover:text-red-500 rounded-lg transition-colors group"
                  title="Decommission Node"
                >
-                 <Trash2 className="w-5 h-5" />
+                 <Trash2 className="w-4 h-4" />
                </button>
              )}
              <button 
                onClick={handleSubmit}
                disabled={isSaving}
-               className="flex items-center gap-2 bg-sky-600 hover:bg-sky-500 disabled:opacity-50 text-white text-xs font-bold px-6 py-2 rounded-lg transition-all shadow-[0_0_15px_rgba(14,165,233,0.3)]"
+               className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-[10px] font-bold px-4 py-2 rounded-lg transition-all shadow-[0_0_10px_rgba(16,185,129,0.2)] uppercase tracking-widest"
              >
-               {isSaving ? 'Processing...' : (
+               {isSaving ? 'Syncing...' : (
                  <>
                    <Save className="w-4 h-4" />
-                   Sync Data
+                   Sync Node
                  </>
                )}
              </button>
           </div>
-        </div>
-      </nav>
-
-      <main className="max-w-4xl mx-auto px-4 py-12">
-        <div className="mb-12">
-          <h1 className="text-4xl font-bold text-white mb-2 tracking-tight">
-            {isNew ? 'Academy Onboarding' : 'Modify Configuration'}
-          </h1>
-          <p className="text-slate-400 font-mono text-[10px] uppercase tracking-[0.2em]">
-            System: Airman Cockpit // Authority: Level 4 Admin
-          </p>
         </div>
 
         {error && (

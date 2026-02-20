@@ -25,13 +25,57 @@ async function main() {
             password: hashedPassword,
             role: 'ADMIN',
             tenantId: tenant.id,
+            status: 'APPROVED',
         },
     });
 
-    console.log('Seed successful!');
-    console.log('Admin Username: ADMIN');
-    console.log('Admin Password: admin123');
-    console.log('Tenant ID:', tenant.id);
+    // 3. Create Instructor (Maverick)
+    const instructor = await prisma.user.upsert({
+        where: { username: 'MAVERICK' },
+        update: {},
+        create: {
+            username: 'MAVERICK',
+            password: hashedPassword,
+            role: 'INSTRUCTOR',
+            tenantId: tenant.id,
+            status: 'APPROVED',
+        },
+    });
+
+    // 4. Create Student (Rooster)
+    const student = await prisma.user.upsert({
+        where: { username: 'ROOSTER' },
+        update: {},
+        create: {
+            username: 'ROOSTER',
+            password: hashedPassword,
+            role: 'STUDENT',
+            tenantId: tenant.id,
+            status: 'APPROVED',
+        },
+    });
+
+    // 5. Create a Course (Created by Maverick)
+    await prisma.course.upsert({
+        where: { id: 'top-gun-ground-school' },
+        update: {},
+        create: {
+            id: 'top-gun-ground-school',
+            title: 'Top Gun Ground School',
+            description: 'Advanced tactical training for elite naval aviators.',
+            tenantId: tenant.id,
+            instructorId: instructor.id,
+            lastModifiedById: instructor.id,
+        }
+    });
+
+    console.log('Seed successful! 🚀');
+    console.log('------------------------------------------------');
+    console.log('Tenant:   Top Gun Academy');
+    console.log('Admin:    admin / admin123');
+    console.log('Instruct: maverick / admin123');
+    console.log('Student:  rooster / admin123');
+    console.log('------------------------------------------------');
 }
 
 main()

@@ -141,7 +141,8 @@ export const createTenantUser = catchAsync(async (req: Request, res: Response, n
             username: decryptedUsername,
             password: hashedPassword,
             role: 'TENANT' as any,
-            tenantId
+            tenantId,
+            status: 'APPROVED'
         }
     });
 
@@ -192,5 +193,129 @@ export const updatePersonnelPassword = catchAsync(async (req: Request, res: Resp
     res.status(200).json({
         status: 'success',
         message: 'Personnel password updated successfully'
+    });
+});
+
+// ─── Tenant-scoped Instructor Management ────────────────────────────────────
+
+export const getMyInstructors = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const tenantId = req.user.tenantId;
+
+    const instructors = await prisma.user.findMany({
+        where: {
+            tenantId,
+            role: 'INSTRUCTOR' as any
+        },
+        select: {
+            id: true,
+            username: true,
+            role: true,
+            createdAt: true
+        }
+    });
+
+    res.status(200).json({
+        status: 'success',
+        results: instructors.length,
+        data: { instructors }
+    });
+});
+
+export const createInstructor = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const { username, password } = req.body;
+    const tenantId = req.user.tenantId;
+
+    if (!username || !password) {
+        return next(new AppError('Please provide username and password', 400));
+    }
+
+    const { decryptData } = require('../utils/crypto');
+    const decryptedUsername = decryptData(username).toUpperCase();
+    const decryptedPassword = decryptData(password);
+
+    // Check for duplicate username
+    const existingUser = await prisma.user.findFirst({
+        where: { username: decryptedUsername }
+    });
+
+    if (existingUser) {
+        return next(new AppError('This callsign is already registered in the Airman network', 400));
+    }
+
+    const bcrypt = require('bcryptjs');
+    const hashedPassword = await bcrypt.hash(decryptedPassword, 12);
+
+    const instructor = await prisma.user.create({
+        data: {
+            username: decryptedUsername,
+            password: hashedPassword,
+            role: 'INSTRUCTOR' as any,
+            tenantId,
+            status: 'APPROVED'
+        }
+    });
+
+    (instructor as any).password = undefined;
+
+    res.status(201).json({
+        status: 'success',
+        data: { instructor }
+    });
+});
+
+export const updateInstructorPassword = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const { newPassword } = req.body;
+    const { userId } = req.params;
+    const tenantId = req.user.tenantId;
+
+    if (!newPassword) {
+        return next(new AppError('Please provide a new password', 400));
+    }
+
+    const instructor = await prisma.user.findFirst({
+        where: { id: userId, tenantId, role: 'INSTRUCTOR' as any }
+    });
+
+    if (!instructor) {
+        return next(new AppError('Instructor not found or unauthorized', 404));
+    }
+
+    const { decryptData } = require('../utils/crypto');
+    const decryptedPassword = decryptData(newPassword);
+
+    const bcrypt = require('bcryptjs');
+    const hashedPassword = await bcrypt.hash(decryptedPassword, 12);
+
+    await prisma.user.update({
+        where: { id: userId },
+        data: { password: hashedPassword }
+    });
+
+    res.status(200).json({
+        status: 'success',
+        message: 'Instructor access key updated successfully'
+    });
+});
+
+export const getInstructors = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const tenantId = req.params.id;
+
+    const instructors = await prisma.user.findMany({
+        where: {
+            tenantId,
+            role: 'INSTRUCTOR'
+        },
+        select: {
+            id: true,
+            username: true,
+            role: true,
+            createdAt: true
+        }
+    });
+
+    res.status(200).json({
+        status: 'success',
+        results: instructors.length,
+        data: { instructors }
     });
 });
