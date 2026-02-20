@@ -27,6 +27,8 @@ function TenantFormContent() {
 
   // Personnel State
   const [users, setUsers] = useState<any[]>([]);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
   const [isCreatingUser, setIsCreatingUser] = useState(false);
   const [userForm, setUserForm] = useState({ username: '', password: '' });
@@ -49,7 +51,7 @@ function TenantFormContent() {
         try {
           const [tenantRes, usersRes] = await Promise.all([
             apiService.getTenant(id),
-            apiService.getTenantUsers(id)
+            apiService.getTenantUsers(id, page)
           ]);
 
           if (tenantRes.status === 'success') {
@@ -65,6 +67,7 @@ function TenantFormContent() {
 
           if (usersRes.status === 'success') {
             setUsers(usersRes.data.users);
+            setTotalPages(usersRes.pages || 1);
           }
         } catch (err: any) {
           setError('Failed to load academy data');
@@ -74,7 +77,7 @@ function TenantFormContent() {
       };
       fetchData();
     }
-  }, [id, isNew, router]);
+  }, [id, isNew, router, page]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -350,6 +353,26 @@ function TenantFormContent() {
                   </tbody>
                 </table>
               </div>
+
+              {totalPages > 1 && (
+                <div className="flex items-center justify-center gap-3 mt-4">
+                  <button
+                    onClick={() => setPage(p => Math.max(1, p - 1))}
+                    disabled={page === 1}
+                    className="px-3 py-1 bg-slate-800 hover:bg-slate-700 disabled:opacity-30 text-sky-400 text-xs rounded-lg transition-all"
+                  >
+                    Prev
+                  </button>
+                  <span className="text-slate-500 font-mono text-xs">{page} / {totalPages}</span>
+                  <button
+                    onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                    disabled={page === totalPages}
+                    className="px-3 py-1 bg-slate-800 hover:bg-slate-700 disabled:opacity-30 text-sky-400 text-xs rounded-lg transition-all"
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
             </section>
           )}
         </div>

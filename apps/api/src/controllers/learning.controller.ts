@@ -3,6 +3,7 @@ import prisma from '../prisma';
 import { catchAsync } from '../utils/catchAsync';
 import { AppError } from '../utils/appError';
 import { AuditService } from '../services/audit.service';
+import { invalidateCachePrefix } from '../middleware/cache.middleware';
 
 // ─── COURSES ────────────────────────────────────────────────────────────────
 
@@ -105,6 +106,8 @@ export const createCourse = catchAsync(async (req: Request, res: Response, next:
         correlationId: req.correlationId
     });
 
+    await invalidateCachePrefix(`${tenantId}:/api/v1/learning/courses`);
+
     res.status(201).json({ status: 'success', data: { course } });
 });
 
@@ -136,6 +139,8 @@ export const updateCourse = catchAsync(async (req: Request, res: Response, next:
         correlationId: req.correlationId
     });
 
+    await invalidateCachePrefix(`${tenantId}:/api/v1/learning/courses`);
+
     res.status(200).json({ status: 'success', data: { course } });
 });
 
@@ -149,6 +154,8 @@ export const deleteCourse = catchAsync(async (req: Request, res: Response, next:
     if (!existing) return next(new AppError('Course not found or unauthorized', 404));
 
     await prisma.course.delete({ where: { id: req.params.id } });
+
+    await invalidateCachePrefix(`${tenantId}:/api/v1/learning/courses`);
 
     res.status(204).json({ status: 'success', data: null });
 });
@@ -170,6 +177,8 @@ export const createModule = catchAsync(async (req: Request, res: Response, next:
         data: { title, courseId, lastModifiedById: req.user.id }
     });
 
+    await invalidateCachePrefix(`${tenantId}:/api/v1/learning/courses`);
+
     res.status(201).json({ status: 'success', data: { module } });
 });
 
@@ -188,6 +197,8 @@ export const updateModule = catchAsync(async (req: Request, res: Response, next:
         }
     });
 
+    await invalidateCachePrefix(`${tenantId}:/api/v1/learning/courses`);
+
     res.status(200).json({ status: 'success', data: { module } });
 });
 
@@ -199,6 +210,8 @@ export const deleteModule = catchAsync(async (req: Request, res: Response, next:
     if (!course) return next(new AppError('Course not found', 404));
 
     await prisma.module.delete({ where: { id: moduleId } });
+
+    await invalidateCachePrefix(`${tenantId}:/api/v1/learning/courses`);
 
     res.status(204).json({ status: 'success', data: null });
 });
@@ -232,6 +245,8 @@ export const createLesson = catchAsync(async (req: Request, res: Response, next:
         });
     }
 
+    await invalidateCachePrefix(`${tenantId}:/api/v1/learning/courses`);
+
     res.status(201).json({ status: 'success', data: { lesson } });
 });
 
@@ -251,6 +266,8 @@ export const updateLesson = catchAsync(async (req: Request, res: Response, next:
         }
     });
 
+    await invalidateCachePrefix(`${tenantId}:/api/v1/learning/courses`);
+
     res.status(200).json({ status: 'success', data: { lesson } });
 });
 
@@ -262,6 +279,8 @@ export const deleteLesson = catchAsync(async (req: Request, res: Response, next:
     if (!course) return next(new AppError('Course not found', 404));
 
     await prisma.lesson.delete({ where: { id: lessonId } });
+
+    await invalidateCachePrefix(`${tenantId}:/api/v1/learning/courses`);
 
     res.status(204).json({ status: 'success', data: null });
 });

@@ -100,8 +100,8 @@ class ApiService {
         return this.delete(`${ENDPOINTS.TENANTS.BASE}/${id}`);
     }
 
-    async getTenantUsers(id: string) {
-        return this.get(`${ENDPOINTS.TENANTS.BASE}/${id}/users`);
+    async getTenantUsers(id: string, page: number = 1) {
+        return this.get(`${ENDPOINTS.TENANTS.BASE}/${id}/users?page=${page}`);
     }
 
     async createTenantUser(id: string, userData: any) {
@@ -113,8 +113,8 @@ class ApiService {
     }
 
     // Instructor management (for TENANT users)
-    async getMyInstructors() {
-        return this.get(`${ENDPOINTS.TENANTS.BASE}/my/instructors`);
+    async getMyInstructors(page: number = 1) {
+        return this.get(`${ENDPOINTS.TENANTS.BASE}/my/instructors?page=${page}`);
     }
 
     async createInstructor(data: any) {

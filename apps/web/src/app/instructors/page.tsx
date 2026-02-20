@@ -10,6 +10,8 @@ import { encryptData } from '@/lib/crypto';
 export default function InstructorsPage() {
   const router = useRouter();
   const [instructors, setInstructors] = useState<any[]>([]);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -32,9 +34,10 @@ export default function InstructorsPage() {
 
     const fetchInstructors = async () => {
       try {
-        const res = await apiService.getMyInstructors();
+        const res = await apiService.getMyInstructors(page);
         if (res.status === 'success') {
           setInstructors(res.data.instructors);
+          setTotalPages(res.pages || 1);
         }
       } catch (err: any) {
         setError('Failed to load instructors');
@@ -43,7 +46,7 @@ export default function InstructorsPage() {
       }
     };
     fetchInstructors();
-  }, [router]);
+  }, [router, page]);
 
   const handleAddInstructor = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -200,6 +203,26 @@ export default function InstructorsPage() {
             </tbody>
           </table>
         </div>
+
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center gap-3 mt-6">
+            <button
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+              disabled={page === 1}
+              className="px-4 py-2 bg-slate-800 hover:bg-slate-700 disabled:opacity-30 text-sky-400 text-xs font-bold rounded-xl border border-sky-400/20 transition-all"
+            >
+              ← Prev
+            </button>
+            <span className="text-slate-500 font-mono text-xs">{page} / {totalPages}</span>
+            <button
+              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+              disabled={page === totalPages}
+              className="px-4 py-2 bg-slate-800 hover:bg-slate-700 disabled:opacity-30 text-sky-400 text-xs font-bold rounded-xl border border-sky-400/20 transition-all"
+            >
+              Next →
+            </button>
+          </div>
+        )}
       </main>
 
       {/* Add Instructor Modal */}

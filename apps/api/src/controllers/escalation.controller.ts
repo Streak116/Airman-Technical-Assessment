@@ -7,25 +7,34 @@ import { AuditService } from '../services/audit.service';
 export const getEscalations = catchAsync(async (req: Request, res: Response) => {
     const tenantId = req.user.tenantId;
 
-    const escalations = await prisma.escalation.findMany({
-        where: {
-            tenantId,
-            status: 'UNRESOLVED'
-        },
-        include: {
-            booking: {
-                include: {
-                    student: { select: { id: true, username: true } }
+    const pageNum = parseInt(req.query.page as string || '1', 10);
+    const limitNum = parseInt(req.query.limit as string || '10', 10);
+    const skip = (pageNum - 1) * limitNum;
+    const where = { tenantId, status: 'UNRESOLVED' as any };
+
+    const [escalations, total] = await Promise.all([
+        prisma.escalation.findMany({
+            where,
+            include: {
+                booking: {
+                    include: {
+                        student: { select: { id: true, username: true } }
+                    }
                 }
-            }
-        },
-        orderBy: { createdAt: 'desc' },
-        take: 20 // Limit to recent 20 for the UI dropdown
-    });
+            },
+            orderBy: { createdAt: 'desc' },
+            skip,
+            take: limitNum
+        }),
+        prisma.escalation.count({ where })
+    ]);
 
     res.status(200).json({
         status: 'success',
         results: escalations.length,
+        total,
+        page: pageNum,
+        pages: Math.ceil(total / limitNum),
         data: { escalations }
     });
 });

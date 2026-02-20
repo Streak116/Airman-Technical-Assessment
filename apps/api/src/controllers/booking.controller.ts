@@ -136,16 +136,32 @@ export const getAllBookings = catchAsync(async (req: Request, res: Response, nex
         ];
     }
 
-    const bookings = await prisma.booking.findMany({
-        where: whereClause,
-        include: {
-            student: { select: { id: true, username: true } },
-            instructor: { select: { id: true, username: true } }
-        },
-        orderBy: { startTime: 'asc' }
-    });
+    const pageNum = parseInt(req.query.page as string || '1', 10);
+    const limitNum = parseInt(req.query.limit as string || '10', 10);
+    const skip = (pageNum - 1) * limitNum;
 
-    res.status(200).json({ status: 'success', results: bookings.length, data: { bookings } });
+    const [bookings, total] = await Promise.all([
+        prisma.booking.findMany({
+            where: whereClause,
+            include: {
+                student: { select: { id: true, username: true } },
+                instructor: { select: { id: true, username: true } }
+            },
+            orderBy: { startTime: 'asc' },
+            skip,
+            take: limitNum
+        }),
+        prisma.booking.count({ where: whereClause })
+    ]);
+
+    res.status(200).json({
+        status: 'success',
+        results: bookings.length,
+        total,
+        page: pageNum,
+        pages: Math.ceil(total / limitNum),
+        data: { bookings }
+    });
 });
 
 // Update Booking (Approve/Assign/Cancel) - Tenant Only (mostly)

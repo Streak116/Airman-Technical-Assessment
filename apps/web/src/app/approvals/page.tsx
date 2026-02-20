@@ -18,6 +18,8 @@ import Navbar from '@/components/layout/Navbar';
 export default function ApprovalsPage() {
   const router = useRouter();
   const [pendingStudents, setPendingStudents] = useState<any[]>([]);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [actioningId, setActioningId] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
@@ -38,17 +40,24 @@ export default function ApprovalsPage() {
     }
 
     setUser(parsedUser);
-    fetchPendingStudents(token);
-  }, []);
+  }, [router]);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+        fetchPendingStudents(token);
+    }
+  }, [page]);
 
   async function fetchPendingStudents(token: string) {
     try {
-      const res = await fetch('http://localhost:4000/api/v1/users/pending-students', {
+      const res = await fetch(`http://localhost:4000/api/v1/users/pending-students?page=${page}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
       if (data.status === 'success') {
         setPendingStudents(data.data.students);
+        setTotalPages(data.pages || 1);
       }
     } catch (err) {
       console.error('Failed to fetch pending students:', err);
@@ -196,6 +205,26 @@ export default function ApprovalsPage() {
               ))
             )}
           </div>
+
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-3 p-6 border-t border-white/5">
+              <button
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 disabled:opacity-30 text-sky-400 text-xs font-bold rounded-xl border border-sky-400/20 transition-all"
+              >
+                ← Prev
+              </button>
+              <span className="text-slate-500 font-mono text-xs">{page} / {totalPages}</span>
+              <button
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 disabled:opacity-30 text-sky-400 text-xs font-bold rounded-xl border border-sky-400/20 transition-all"
+              >
+                Next →
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Info */}

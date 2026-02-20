@@ -73,8 +73,8 @@ export default function SchedulePage() {
     try {
       setLoading(true);
       // Fetch bookings for the current week/month range
-      // For MVP, just fetching all (or let backend filter default)
-      const res = await apiFetch(API.BOOKINGS);
+      // For MVP, increasing limit to ensure calendar populates properly
+      const res = await apiFetch(`${API.BOOKINGS}?limit=100`);
       setBookings(res.data.bookings);
     } catch (e: any) {
       console.error(e);

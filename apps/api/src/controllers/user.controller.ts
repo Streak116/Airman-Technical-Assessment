@@ -19,21 +19,33 @@ export const getPendingStudents = catchAsync(async (req: Request, res: Response,
         where.tenantId = tenantId;
     }
 
-    const students = await prisma.user.findMany({
-        where,
-        select: {
-            id: true,
-            username: true,
-            role: true,
-            createdAt: true,
-            tenant: { select: { id: true, name: true } }
-        },
-        orderBy: { createdAt: 'desc' }
-    });
+    const pageNum = parseInt(req.query.page as string || '1', 10);
+    const limitNum = parseInt(req.query.limit as string || '10', 10);
+    const skip = (pageNum - 1) * limitNum;
+
+    const [students, total] = await Promise.all([
+        prisma.user.findMany({
+            where,
+            select: {
+                id: true,
+                username: true,
+                role: true,
+                createdAt: true,
+                tenant: { select: { id: true, name: true } }
+            },
+            orderBy: { createdAt: 'desc' },
+            skip,
+            take: limitNum
+        }),
+        prisma.user.count({ where })
+    ]);
 
     res.status(200).json({
         status: 'success',
         results: students.length,
+        total,
+        page: pageNum,
+        pages: Math.ceil(total / limitNum),
         data: { students }
     });
 });

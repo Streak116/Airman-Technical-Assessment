@@ -87,25 +87,36 @@ export const deleteTenant = catchAsync(async (req: Request, res: Response, next:
 });
 
 export const getTenantUsers = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const users = await prisma.user.findMany({
-        where: {
-            tenantId: req.params.id,
-            role: 'TENANT'
-        },
-        select: {
-            id: true,
-            username: true,
-            role: true,
-            createdAt: true
-        }
-    });
+    const pageNum = parseInt(req.query.page as string || '1', 10);
+    const limitNum = parseInt(req.query.limit as string || '10', 10);
+    const skip = (pageNum - 1) * limitNum;
+    const where = {
+        tenantId: req.params.id,
+        role: 'TENANT' as any
+    };
+
+    const [users, total] = await Promise.all([
+        prisma.user.findMany({
+            where,
+            select: {
+                id: true,
+                username: true,
+                role: true,
+                createdAt: true
+            },
+            skip,
+            take: limitNum
+        }),
+        prisma.user.count({ where })
+    ]);
 
     res.status(200).json({
         status: 'success',
         results: users.length,
-        data: {
-            users
-        }
+        total,
+        page: pageNum,
+        pages: Math.ceil(total / limitNum),
+        data: { users }
     });
 });
 
@@ -201,22 +212,35 @@ export const updatePersonnelPassword = catchAsync(async (req: Request, res: Resp
 export const getMyInstructors = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const tenantId = req.user.tenantId;
 
-    const instructors = await prisma.user.findMany({
-        where: {
-            tenantId,
-            role: 'INSTRUCTOR' as any
-        },
-        select: {
-            id: true,
-            username: true,
-            role: true,
-            createdAt: true
-        }
-    });
+    const pageNum = parseInt(req.query.page as string || '1', 10);
+    const limitNum = parseInt(req.query.limit as string || '10', 10);
+    const skip = (pageNum - 1) * limitNum;
+    const where = {
+        tenantId,
+        role: 'INSTRUCTOR' as any
+    };
+
+    const [instructors, total] = await Promise.all([
+        prisma.user.findMany({
+            where,
+            select: {
+                id: true,
+                username: true,
+                role: true,
+                createdAt: true
+            },
+            skip,
+            take: limitNum
+        }),
+        prisma.user.count({ where })
+    ]);
 
     res.status(200).json({
         status: 'success',
         results: instructors.length,
+        total,
+        page: pageNum,
+        pages: Math.ceil(total / limitNum),
         data: { instructors }
     });
 });
@@ -300,22 +324,35 @@ export const updateInstructorPassword = catchAsync(async (req: Request, res: Res
 export const getInstructors = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const tenantId = req.params.id;
 
-    const instructors = await prisma.user.findMany({
-        where: {
-            tenantId,
-            role: 'INSTRUCTOR'
-        },
-        select: {
-            id: true,
-            username: true,
-            role: true,
-            createdAt: true
-        }
-    });
+    const pageNum = parseInt(req.query.page as string || '1', 10);
+    const limitNum = parseInt(req.query.limit as string || '10', 10);
+    const skip = (pageNum - 1) * limitNum;
+    const where = {
+        tenantId,
+        role: 'INSTRUCTOR' as any
+    };
+
+    const [instructors, total] = await Promise.all([
+        prisma.user.findMany({
+            where,
+            select: {
+                id: true,
+                username: true,
+                role: true,
+                createdAt: true
+            },
+            skip,
+            take: limitNum
+        }),
+        prisma.user.count({ where })
+    ]);
 
     res.status(200).json({
         status: 'success',
         results: instructors.length,
+        total,
+        page: pageNum,
+        pages: Math.ceil(total / limitNum),
         data: { instructors }
     });
 });

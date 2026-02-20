@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import * as lc from '../controllers/learning.controller';
 import { protect, restrictTo } from '../middleware/auth.middleware';
+import { cacheMiddleware } from '../middleware/cache.middleware';
 
 const router = Router();
 
@@ -9,11 +10,11 @@ router.use(protect);
 // ─── Courses ─────────────────────────────────────────────────────────────────
 // Both INSTRUCTOR and TENANT can view courses; only INSTRUCTOR can create/edit/delete
 router.route('/courses')
-    .get(restrictTo('INSTRUCTOR', 'TENANT', 'STUDENT'), lc.getCourses)
+    .get(restrictTo('INSTRUCTOR', 'TENANT', 'STUDENT'), cacheMiddleware(300), lc.getCourses)
     .post(restrictTo('INSTRUCTOR'), lc.createCourse);
 
 router.route('/courses/:id')
-    .get(restrictTo('INSTRUCTOR', 'TENANT', 'STUDENT'), lc.getCourse)
+    .get(restrictTo('INSTRUCTOR', 'TENANT', 'STUDENT'), cacheMiddleware(300), lc.getCourse)
     .patch(restrictTo('INSTRUCTOR'), lc.updateCourse)
     .delete(restrictTo('INSTRUCTOR'), lc.deleteCourse);
 
