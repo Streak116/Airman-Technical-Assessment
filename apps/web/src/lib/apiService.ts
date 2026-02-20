@@ -1,5 +1,13 @@
 import { ENDPOINTS } from './constants';
 import { encryptData } from './crypto';
+export const globalLoader = {
+    start: () => {
+        if (typeof window !== 'undefined') window.dispatchEvent(new Event('apiLoadStart'));
+    },
+    stop: () => {
+        if (typeof window !== 'undefined') window.dispatchEvent(new Event('apiLoadEnd'));
+    }
+};
 
 class ApiService {
     private getHeaders() {
@@ -22,38 +30,58 @@ class ApiService {
     }
 
     async post(url: string, body: any) {
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: this.getHeaders(),
-            body: JSON.stringify(body),
-        });
-        return this.handleResponse(response);
+        globalLoader.start();
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: this.getHeaders(),
+                body: JSON.stringify(body),
+            });
+            return await this.handleResponse(response);
+        } finally {
+            globalLoader.stop();
+        }
     }
 
     async get(url: string) {
-        const response = await fetch(url, {
-            method: 'GET',
-            headers: this.getHeaders(),
-        });
-        return this.handleResponse(response);
+        globalLoader.start();
+        try {
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: this.getHeaders(),
+            });
+            return await this.handleResponse(response);
+        } finally {
+            globalLoader.stop();
+        }
     }
 
     async patch(url: string, body: any) {
-        const response = await fetch(url, {
-            method: 'PATCH',
-            headers: this.getHeaders(),
-            body: JSON.stringify(body),
-        });
-        return this.handleResponse(response);
+        globalLoader.start();
+        try {
+            const response = await fetch(url, {
+                method: 'PATCH',
+                headers: this.getHeaders(),
+                body: JSON.stringify(body),
+            });
+            return await this.handleResponse(response);
+        } finally {
+            globalLoader.stop();
+        }
     }
 
     async delete(url: string) {
-        const response = await fetch(url, {
-            method: 'DELETE',
-            headers: this.getHeaders(),
-        });
-        if (response.status === 204) return { status: 'success' };
-        return this.handleResponse(response);
+        globalLoader.start();
+        try {
+            const response = await fetch(url, {
+                method: 'DELETE',
+                headers: this.getHeaders(),
+            });
+            if (response.status === 204) return { status: 'success' };
+            return await this.handleResponse(response);
+        } finally {
+            globalLoader.stop();
+        }
     }
 
     // Auth specific

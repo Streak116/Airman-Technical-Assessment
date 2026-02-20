@@ -103,7 +103,6 @@ export default function TenantsPage() {
                   </div>
                   <div>
                     <h3 className="text-white font-bold group-hover:text-sky-400 transition-colors">{tenant.name}</h3>
-                    <p className="text-[10px] font-mono text-slate-500 uppercase">{tenant.id}</p>
                   </div>
                 </div>
 

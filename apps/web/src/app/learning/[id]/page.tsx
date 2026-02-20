@@ -8,23 +8,29 @@ import {
 } from 'lucide-react';
 import RichTextEditor from '@/components/learning/RichTextEditor';
 import { ENDPOINTS } from '@/lib/constants';
+import { globalLoader } from '@/lib/apiService';
 
 const API = ENDPOINTS.LEARNING;
 
 async function apiFetch(url: string, options: RequestInit = {}) {
   const token = localStorage.getItem('token');
-  const res = await fetch(url, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...(options.headers || {}),
-    },
-  });
-  if (res.status === 204) return { status: 'success' };
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.message || 'Request failed');
-  return data;
+  globalLoader.start();
+  try {
+    const res = await fetch(url, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(options.headers || {}),
+      },
+    });
+    if (res.status === 204) return { status: 'success' };
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Request failed');
+    return data;
+  } finally {
+    globalLoader.stop();
+  }
 }
 
 // ─── Inline Editable Field ───────────────────────────────────────────────────

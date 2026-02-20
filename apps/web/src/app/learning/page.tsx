@@ -5,27 +5,33 @@ import { useRouter } from 'next/navigation';
 import { ArrowLeft, Plus, Search, BookOpen, Layers, ChevronRight, Plane, Trash2, Edit2 } from 'lucide-react';
 import { ENDPOINTS } from '@/lib/constants';
 import Navbar from '@/components/layout/Navbar';
+import { globalLoader } from '@/lib/apiService';
 
 const API = ENDPOINTS.LEARNING;
 
 async function apiFetch(url: string, options: RequestInit = {}) {
   const token = localStorage.getItem('token');
-  const res = await fetch(url, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...(options.headers || {}),
-    },
-  });
-  // 204 No Content (e.g. DELETE) has no body — don't try to parse JSON
-  if (res.status === 204 || res.headers.get('content-length') === '0') {
-    if (!res.ok) throw new Error('Request failed');
-    return { status: 'success' };
+  globalLoader.start();
+  try {
+    const res = await fetch(url, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(options.headers || {}),
+      },
+    });
+    // 204 No Content (e.g. DELETE) has no body — don't try to parse JSON
+    if (res.status === 204 || res.headers.get('content-length') === '0') {
+      if (!res.ok) throw new Error('Request failed');
+      return { status: 'success' };
+    }
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Request failed');
+    return data;
+  } finally {
+    globalLoader.stop();
   }
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.message || 'Request failed');
-  return data;
 }
 
 export default function LearningCenterPage() {
